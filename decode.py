@@ -31,9 +31,11 @@ def extractCborHeader(cborData:bytes):
 	return { 'issuer': webTokenResult[1], 'expiration_time': webTokenResult[4], 'issued_at': webTokenResult[6] }
 
 
-
 def decodeCBORWebTokenPayload(cborData:bytes):
 	cborValue = decodeCBORWebTokenEntries(cborData)
+	# here is data hiding ([0]/[1]/[3])
+	# maybe cose headers & signature
+	# https://pycose.readthedocs.io/en/latest/cose/messages/sign1message.html
 	sub_payload = cbor2.loads(cborValue[2])
 	return sub_payload
 
@@ -60,12 +62,9 @@ def extractCertificate(cborData:bytes):
 	#// -260: Container of Digital Green Certificate
 	healthCertificateElement = cborPayload[-260]
 	#// 1: Digital Green Certificate
-	healthCertificateCBOR = healthCertificateElement[1]
-	#todo 
-	#validateSchema
+	healthCertificateCBOR = healthCertificateElement[1] 
+	#maybe todo validateSchema
 	
-
-	#print(healthCertificateCBOR)
 	return healthCertificateCBOR
 
 
@@ -79,13 +78,22 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	cert = args.certAsString
 
-
 	cborData = extractCborData(cert)
-	print("Alles:")
-	print(decodeCBORWebTokenPayload(cborData))
 	print("Header:")
 	print(extractCborHeader(cborData))
 	print("Cert:")
 	print(extractCertificate(cborData))
+	# vaccination data
+	# Disease or agent targeted, e.g. "tg": "840539006"
+    # Vaccine or prophylaxis, e.g. "vp": "1119349007"
+    # Vaccine medicinal product,e.g. "mp": "EU/1/20/1528",
+    # Marketing Authorization Holder, e.g. "ma": "ORG-100030215",
+    # Dose Number, e.g. "dn": 2
+    # Total Series of Doses, e.g. "sd": 2,
+    # Date of Vaccination, e.g. "dt" : "2021-04-21"
+    # Country of Vaccination, e.g. "co": "NL"
+    # Certificate Issuer, e.g. "is": "Ministry of Public Health, Welfare and Sport",
+    # Unique Certificate Identifier, e.g.  "ci": "urn:uvci:01:NL:PlA8UWS60Z4RZXVALl6GAZ"
+
 
 
